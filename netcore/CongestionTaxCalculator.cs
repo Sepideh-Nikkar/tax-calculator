@@ -1,5 +1,5 @@
-using System;
 using congestion.calculator;
+using System;
 public class CongestionTaxCalculator
 {
     /**
@@ -10,46 +10,44 @@ public class CongestionTaxCalculator
          * @return - the total congestion tax for that day
          */
 
-    public int GetTax(Vehicle vehicle, DateTime[] dates)
+    public int GetTax(VehicleType vehicle, DateTime[] dates)
     {
+        if (dates == null || dates.Length == 0) return 0;
+
+        Array.Sort(dates);
+
         DateTime intervalStart = dates[0];
-        int totalFee = 0;
-        foreach (DateTime date in dates)
+        var totalFee = GetTollFee(intervalStart, vehicle);
+        for (int i = 1; i < dates.Length; i++)
         {
-            int nextFee = GetTollFee(date, vehicle);
-            int tempFee = GetTollFee(intervalStart, vehicle);
+            int intervalStartFee = GetTollFee(intervalStart, vehicle);
+            int nextFee = GetTollFee(dates[i], vehicle);
 
-            long diffInMillies = date.Millisecond - intervalStart.Millisecond;
-            long minutes = diffInMillies / 1000 / 60;
-
-            if (minutes <= 60)
+            if (AreDatesAnHourApart(dates[i], intervalStart))
             {
-                if (totalFee > 0) totalFee -= tempFee;
-                if (nextFee >= tempFee) tempFee = nextFee;
-                totalFee += tempFee;
+                totalFee += nextFee;
+                intervalStart = dates[i];
             }
             else
             {
-                totalFee += nextFee;
+                totalFee -= intervalStartFee;
+                totalFee += (nextFee >= intervalStartFee) ? nextFee : intervalStartFee;
             }
         }
-        if (totalFee > 60) totalFee = 60;
-        return totalFee;
+
+        return Math.Min(totalFee, 60);
     }
 
-    private bool IsTollFreeVehicle(Vehicle vehicle)
+    private bool AreDatesAnHourApart(DateTime date1, DateTime date2)
     {
-        if (vehicle == null) return false;
-        String vehicleType = vehicle.GetVehicleType();
-        return vehicleType.Equals(TollFreeVehicles.Motorcycle.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Tractor.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Emergency.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Diplomat.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Foreign.ToString()) ||
-               vehicleType.Equals(TollFreeVehicles.Military.ToString());
+        if (date1.Day != date2.Day)
+            return true;
+
+        var secondsDiff = date1.Hour * 3600 + date1.Minute * 60 + date1.Second - (date2.Hour * 3600 + date2.Minute * 60 + date2.Second);
+        return secondsDiff / 60 >= 60;
     }
 
-    public int GetTollFee(DateTime date, Vehicle vehicle)
+    public int GetTollFee(DateTime date, VehicleType vehicle)
     {
         if (IsTollFreeDate(date) || IsTollFreeVehicle(vehicle)) return 0;
 
@@ -60,7 +58,7 @@ public class CongestionTaxCalculator
         else if (hour == 6 && minute >= 30 && minute <= 59) return 13;
         else if (hour == 7 && minute >= 0 && minute <= 59) return 18;
         else if (hour == 8 && minute >= 0 && minute <= 29) return 13;
-        else if (hour >= 8 && hour <= 14 && minute >= 30 && minute <= 59) return 8;
+        else if ((hour == 8 && minute >= 30) || (hour == 14 && minute <= 59) || (hour > 9 && hour < 14)) return 8;
         else if (hour == 15 && minute >= 0 && minute <= 29) return 13;
         else if (hour == 15 && minute >= 0 || hour == 16 && minute <= 59) return 18;
         else if (hour == 17 && minute >= 0 && minute <= 59) return 13;
@@ -68,7 +66,7 @@ public class CongestionTaxCalculator
         else return 0;
     }
 
-    private Boolean IsTollFreeDate(DateTime date)
+    private bool IsTollFreeDate(DateTime date)
     {
         int year = date.Year;
         int month = date.Month;
@@ -83,7 +81,6 @@ public class CongestionTaxCalculator
                 month == 4 && (day == 1 || day == 30) ||
                 month == 5 && (day == 1 || day == 8 || day == 9) ||
                 month == 6 && (day == 5 || day == 6 || day == 21) ||
-                month == 7 ||
                 month == 11 && day == 1 ||
                 month == 12 && (day == 24 || day == 25 || day == 26 || day == 31))
             {
@@ -93,13 +90,13 @@ public class CongestionTaxCalculator
         return false;
     }
 
-    private enum TollFreeVehicles
+    private bool IsTollFreeVehicle(VehicleType vehicle)
     {
-        Motorcycle = 0,
-        Tractor = 1,
-        Emergency = 2,
-        Diplomat = 3,
-        Foreign = 4,
-        Military = 5
+        return vehicle == VehicleType.Motorcycle ||
+               vehicle == VehicleType.Tractor ||
+               vehicle == VehicleType.Emergency ||
+               vehicle == VehicleType.Diplomat ||
+               vehicle == VehicleType.Foreign ||
+               vehicle == VehicleType.Military;
     }
 }

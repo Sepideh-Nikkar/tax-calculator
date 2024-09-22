@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "TcbHS4UfqLRiDrod2vRG+ZW39ZPl5Da/XRh1QRM+mV8=",
+  "Source": "TaxCalculatorWebApp",
+  "BasePath": "_content/TaxCalculatorWebApp",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
