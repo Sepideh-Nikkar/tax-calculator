@@ -1,7 +1,14 @@
 # Congestion Tax Calculator
 
-Welcome the Volvo Cars Congestion Tax Calculator assignment.
+This repository calculates congestion tax fees for vehicles within the Gothenburg area. 
+You can also call an endpoint [root url]/TaxCalculator/CalculateTax, providing type of vehicle and entry dates to receive the total toll fee. Here is an example:
+![image](https://github.com/user-attachments/assets/529b4b15-7d03-4e17-be9d-b84cd42e7bb3)
 
-This repository contains a developer [assignment](ASSIGNMENT.md) used as a basis for candidate intervew and evaluation.
+Limitations: 
+- The year is limited to 2013
 
-Clone this repository to get started. Due to a number of reasons, not least privacy, you will be asked to zip your solution and mail it in, instead of submitting a pull-request. In order to maintain an unbiased reviewing process, please ensure to **keep your name or other Personal Identifiable Information (PII) from the code**.
+future work: 
+- Application logging
+- Explanding years and vehicles types being supported by the api
+- CI/CD pipeline, and deployment (for test and prod environments)
+- Infrastructure as code
